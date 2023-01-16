@@ -1,28 +1,41 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function seed() {
-    const createdUsers = await prisma.user.createMany({
-        data: [
-            { username: 'alicemartin' },
-            { username: 'alicemartin' }
-        ]
-    });
+  const createdUser = await prisma.user.create({
+    data: { username: "alicemart", email: "him@him.com" },
+  });
 
-    console.log(`${createdUsers.count} users created`, createdUsers);
+  const createdProfile = await prisma.profile.create({
+    data: {
+      picture: "alicemart",
+      bio: "this and that",
+      user: { connect: { id: createdUser.id } },
+    },
+  });
 
-    // Add your code here
+  const createdPost = await prisma.post.create({
+    data: {
+      title: "what a post geeez!:):)",
+      content: "yes it is THIS good, you're right...",
+      published: true,
+      user: { connect: { id: createdUser.id } },
+    },
+  });
 
-    
+  const createdComment = await prisma.comment.create({
+    data: {
+      content: "this is SOME post friend",
+      user: { connect: { id: createdUser.id } },
+      post: { connect: { id: createdPost.id } },
+    },
+  });
 
-
-    // Don't edit any of the code below this line
-    process.exit(0);
+  process.exit(0);
 }
 
-seed()
-    .catch(async (error) => {
-        console.error(error);
-        await prisma.$disconnect();
-        process.exit(1);
-    })
+seed().catch(async (error) => {
+  console.error(error);
+  await prisma.$disconnect();
+  process.exit(1);
+});
